@@ -10,20 +10,14 @@ You need to build it first
 g++ sound.cpp -o sound.o
 ```
 
-Edit `data.txt` which contains the data of the music
+Run it with root permission
 
 ```bash
-vim data.txt # Use your favorite editor
-```
-
-When it is all done, run it with root permission
-
-```bash
-sudo ./sound.o
+sudo ./sound.o <data.txt>
 ```
 
 Or you can run this command in order to run commands above automatically
 
 ```bash
-./run.sh
+./run.sh <data.txt>
 ```

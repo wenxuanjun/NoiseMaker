@@ -76,19 +76,8 @@ void play(int console, pitch pitch) {
         else play_pitch(console, pitch);
     }
 }
-        
-int main() {
-    freopen("data.txt", "r", stdin);
-    int console;
-    if((console = open("/dev/console", O_WRONLY)) == -1) {
-        fprintf(stderr, "You need to run it with Root permission\n");
-        exit(1);
-    }
-    vector<pitch> music;
-    while(true) {
-        string str;
-        getline(cin, str);
-        if(str == "END") break;
+
+void read(int console, string str) {
         string result;
         vector<string> res;
         stringstream input;
@@ -96,7 +85,7 @@ int main() {
         while(input >> result) res.push_back(result);
         if(res[0] == "BPM") {
             bpm = atoi(res[1].c_str());
-            continue;
+            return;
         }
         if(res[0] == "R") play(console, {{"R"}, atoi(res[1].c_str())});
         else {
@@ -106,6 +95,26 @@ int main() {
             lin.length = atoi(res[key - 1].c_str());
             play(console, lin);
         }
+}
+        
+int main(int argc, char *argv[]) {
+    if(!argv[1]) {
+        cout << "Command: ./sound.o <data.txt>" << endl;
+        exit(1);
     }
+    ifstream infile;
+    infile.open(argv[1]);
+    if(!infile.is_open()) {
+        cout << "Unable to read this file!" << endl;
+        exit(1);
+    }
+    int console;
+    if((console = open("/dev/console", O_WRONLY)) == -1) {
+        fprintf(stderr, "You need to run it with Root permission\n");
+        exit(1);
+    }
+    string str;
+    while(getline(infile, str)) read(console, str);
+    infile.close(); 
     return 0;
 }
