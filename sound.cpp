@@ -5,8 +5,8 @@
 
 using namespace std;
 
-static const int bpm = 120;
-static const int swing = 20;
+static int bpm = 120;
+static const int swing = 15;
 
 typedef struct {
     string tone[16];
@@ -56,26 +56,24 @@ void play_chord(int console, pitch pitch, int length) {
     }
 }
 
-void play(int console, vector<pitch> music, int length) {
-    for (auto pitch : music) {
-        if (pitch.tone[1][0]) {
-            cout << "chord" << ' ';
-            int size = 0;
-            for (int o = 0; o < 16; o++) {
-                if (pitch.tone[o][0]) size++;
-                else break;
-            }
-            for (int o = 0; o < size; o++)
-                cout << pitch.tone[o % size] << ' ';
-            cout << endl;
-            play_chord(console, pitch, size);
+void play(int console, pitch pitch) {
+    if (pitch.tone[1][0]) {
+        cout << "chord" << ' ';
+        int size = 0;
+        for (int o = 0; o < 16; o++) {
+            if (pitch.tone[o][0]) size++;
+            else break;
         }
-        else {
-            cout << "pitch" << ' ';
-            cout << pitch.tone[0] << endl;
-            if (pitch.tone[0][0] == 'R') rest(pitch.length);
-            else play_pitch(console, pitch);
-        }
+        for (int o = 0; o < size; o++)
+            cout << pitch.tone[o % size] << ' ';
+        cout << endl;
+        play_chord(console, pitch, size);
+    }
+    else {
+        cout << "pitch" << ' ';
+        cout << pitch.tone[0] << endl;
+        if (pitch.tone[0][0] == 'R') rest(pitch.length);
+        else play_pitch(console, pitch);
     }
 }
         
@@ -95,16 +93,19 @@ int main() {
         vector<string> res;
         stringstream input;
         input << str;
-        while (input >> result) res.push_back(result);
-        if(res[0] == "R") music.push_back({{"R"}, atoi(res[1].c_str())});
+        while(input >> result) res.push_back(result);
+        if(res[0] == "BPM") {
+            bpm = atoi(res[1].c_str());
+            continue;
+        }
+        if(res[0] == "R") play(console, {{"R"}, atoi(res[1].c_str())});
         else {
             pitch lin;
             int key = 0;
             for(key ; key < res.size(); key++) if(isalpha(res[key][0])) lin.tone[key] = res[key];
             lin.length = atoi(res[key - 1].c_str());
-            music.push_back(lin);
+            play(console, lin);
         }
     }
-    play(console, music, music.size());
     return 0;
 }
