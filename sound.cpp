@@ -78,23 +78,35 @@ void play(int console, pitch pitch) {
 }
 
 void read(int console, string str) {
-        string result;
-        vector<string> res;
-        stringstream input;
-        input << str;
-        while(input >> result) res.push_back(result);
-        if(res[0] == "BPM") {
-            bpm = atoi(res[1].c_str());
-            return;
-        }
-        if(res[0] == "R") play(console, {{"R"}, atoi(res[1].c_str())});
-        else {
-            pitch lin;
-            int key = 0;
-            for(key ; key < res.size(); key++) if(isalpha(res[key][0])) lin.tone[key] = res[key];
-            lin.length = atoi(res[key - 1].c_str());
-            play(console, lin);
-        }
+	string result;
+	vector<string> res;
+	stringstream input;
+	input << str;
+	while(input >> result) res.push_back(result);
+	if(res[0] == "#") {
+		return;
+	}
+	if(res[0] == "BPM") {
+		bpm = atoi(res[1].c_str());
+		return;        }
+	if(res[0] == "R") play(console, {{"R"}, atoi(res[1].c_str())});
+	else {
+		pitch lin;
+		int key = 0;
+		for(key ; key < res.size(); key++) if(isalpha(res[key][0])) lin.tone[key] = res[key];
+		lin.length = atoi(res[key - 1].c_str());
+		play(console, lin);
+	}
+}
+
+void line_process(string &line, string comment_str = "%") {
+    for (char &ch : line)
+        if (ch == ';' || ch == '\r' || ch == '\n') ch = ' ';
+    line.erase(0, line.find_first_not_of(" "));
+    line.erase(line.find_last_not_of(" ") + 1);
+    int comment_start = line.find_first_of(comment_str);
+    if (comment_start != string::npos)
+        line.erase(comment_start);
 }
         
 int main(int argc, char *argv[]) {
@@ -114,7 +126,11 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     string str;
-    while(getline(infile, str)) read(console, str);
+    while(getline(infile, str)) {
+		line_process(str);
+		if (str.empty()) continue;
+		read(console, str);
+	}
     infile.close(); 
     return 0;
 }
