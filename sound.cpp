@@ -83,9 +83,6 @@ void read(int console, string str) {
 	stringstream input;
 	input << str;
 	while(input >> result) res.push_back(result);
-	if(res[0] == "#") {
-		return;
-	}
 	if(res[0] == "BPM") {
 		bpm = atoi(res[1].c_str());
 		return;        }
