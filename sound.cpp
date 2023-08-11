@@ -18,7 +18,7 @@ using namespace std::this_thread;
 
 constexpr int swing = 35;
 constexpr int max_pitch_length = 16;
-constexpr int clock_frequency = 1190000;
+constexpr int clock_frequency = 1193180;
 
 static int current_bpm = 120;
 
