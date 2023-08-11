@@ -13,21 +13,22 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-static int bpm = 120;
+using namespace std::chrono;
+using namespace std::this_thread;
+
 constexpr int swing = 35;
 constexpr int max_pitch_length = 16;
+constexpr int clock_frequency = 1190000;
+
+static int current_bpm = 120;
 
 using pitch = struct {
     std::string tone[max_pitch_length];
     int length;
 };
 
-static int get_time(int time) {
-    return 4000000 / time * 60 / bpm;
-}
-
-static void rest(int time) {
-    std::this_thread::sleep_for(std::chrono::microseconds(get_time(time)));
+inline static int duration_to_microseconds(int time) {
+    return 4000000 / time * 60 / current_bpm;
 }
 
 static double get_freq(const std::string& tone) {
@@ -47,20 +48,21 @@ static double get_freq(const std::string& tone) {
     return base * std::pow(ratio, midi);
 }
 
-static void play_pitch(int console, pitch pitch) {
-    int magical_number = 1190000 / get_freq(pitch.tone[0]);
+static void play_beep(int console, std::string pitch, int time) {
+    int magical_number = clock_frequency / get_freq(pitch);
     ioctl(console, 0x4B2F, magical_number);
-    rest(pitch.length);
+    sleep_for(microseconds(time));
     ioctl(console, 0x4B2F, 0);
 }
 
+static void play_pitch(int console, pitch pitch) {
+    play_beep(console, pitch.tone[0], duration_to_microseconds(pitch.length));
+}
+
 static void play_chord(int console, pitch pitch, int length) {
-    auto time_ms = get_time(pitch.length) / (1000 * swing);
+    auto time_ms = duration_to_microseconds(pitch.length) / (1000 * swing);
     for (int i = 0; i < time_ms; ++i) {
-        int magical_number = 1190000 / get_freq(pitch.tone[i % length]);
-        ioctl(console, 0x4B2F, magical_number);
-        std::this_thread::sleep_for(std::chrono::milliseconds(swing));
-        ioctl(console, 0x4B2F, 0);
+        play_beep(console, pitch.tone[i % length], 1000 * swing);
     }
 }
 
@@ -82,7 +84,7 @@ static void play(int console, pitch pitch) {
         std::cout << "pitch" << ' ';
         std::cout << pitch.tone[0] << std::endl;
         if (pitch.tone[0][0] == 'R')
-            rest(pitch.length);
+            sleep_for(microseconds(duration_to_microseconds(pitch.length)));
         else
             play_pitch(console, pitch);
     }
@@ -96,7 +98,7 @@ static void read(int console, std::string str) {
     	std::istream_iterator<std::string>()
     };
     if (result[0] == "BPM") {
-        bpm = std::stoi(result[1]);
+        current_bpm = std::stoi(result[1]);
         return;
     }
     if (result[0] == "R") {
