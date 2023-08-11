@@ -1,5 +1,2 @@
-# white list
-!*.cpp
-!*.sh
-!*.txt
-
+# binary files
+*.o

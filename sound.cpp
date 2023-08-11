@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 static int bpm = 120;
-constexpr int swing = 15;
+constexpr int swing = 35;
 constexpr int max_pitch_length = 16;
 
 using pitch = struct {

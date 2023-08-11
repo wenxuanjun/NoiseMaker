@@ -15,3 +15,9 @@ Then run it with **root** permission:
 ```bash
 sudo ./sound.o <data.txt>
 ```
+
+Some examples are provided here:
+
+```bash
+sudo ./sound.o examples/bears.txt
+```
