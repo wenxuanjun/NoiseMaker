@@ -7,7 +7,7 @@ A small tool to play music through the PC speaker in Linux
 You need to build it first:
 
 ```bash
-g++ sound.cpp -o sound.o
+g++ -std=c++2b sound.cpp -o sound.o
 ```
 
 Then run it with **root** permission:
